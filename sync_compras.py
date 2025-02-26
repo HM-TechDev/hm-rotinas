@@ -59,7 +59,6 @@ def sincronizar_compras():
             card_id = node['id']
             dados_cards[card_id] = {}
 
-
             for campo in node['fields']:
                 if campo['name'] == 'Pedido':
                     pedido = int(campo['value'])
