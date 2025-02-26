@@ -49,20 +49,24 @@ def sincronizar_compras():
     if response.status_code == 200:
         dados_resposta = response.json()
 
-        # Guarda os pares "Nº Pedido : Fase" de cada card
+        # Guarda {ID do card {Nº Pedido : Fase}} para cada card no pipe
         dados_cards = {}
-        
+
         # Percorre os cards extraindo o nº do pedido e a fase em que cada card se encontra
         for edge in dados_resposta['data']['cards']['edges']:
             node = edge['node']
             
+            card_id = node['id']
+            dados_cards[card_id] = {}
+
+
             for campo in node['fields']:
                 if campo['name'] == 'Pedido':
                     pedido = int(campo['value'])
             
             fase_atual = node['current_phase']['name']
-
-            dados_cards[pedido] = fase_atual
+            
+            dados_cards[card_id][pedido] = fase_atual
 
         # Percorre a lista contendo o número de todos os pedidos de compra para compará-los com o status no Pipefy
         for n_pedido in n_pedidos_compras:
