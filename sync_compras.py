@@ -67,6 +67,15 @@ def sincronizar_compras():
             
             dados_cards[card_id][pedido] = fase_atual
 
+        # Obtém a ID da fase 'Pagamento'
+        fases_pipefy = obter_fases_pipefy()
+        id_fase_pagamento = None
+
+        for chave, valor in fases_pipefy.items():
+            if valor == 'Pagamento':
+                id_fase_pagamento = chave
+                break
+
         # Percorre a lista contendo o número de todos os pedidos de compra para compará-los com o status no Pipefy
         for n_pedido in n_pedidos_compras:
             if n_pedido in dados_cards and dados_cards[n_pedido] == 'Pagamento':
