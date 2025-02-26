@@ -45,5 +45,21 @@ def sincronizar_compras():
     if response.status_code == 200:
         dados_resposta = response.json()
         print(dados_resposta)
+
+        # Guarda os pares "Nº Pedido : Fase" de cada card
+        dados_cards = {}
+        
+        # Percorre os cards extraindo o nº do pedido e a fase em que cada card se encontra
+        for edge in dados_resposta['data']['cards']['edges']:
+            node = edge['node']
+            
+            for campo in node['fields']:
+                if campo['name'] == 'Pedido':
+                    pedido = campo['value']
+            
+            fase_atual = node['current_phase']['name']
+            
+            dados_cards[pedido] = fase_atual
+
     else:
         print(f"Erro na requisição: {response.status_code}, {response.text}")
