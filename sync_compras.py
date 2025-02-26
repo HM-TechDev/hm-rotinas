@@ -48,7 +48,6 @@ def sincronizar_compras():
 
     if response.status_code == 200:
         dados_resposta = response.json()
-        print(dados_resposta)
 
         # Guarda os pares "Nº Pedido : Fase" de cada card
         dados_cards = {}
@@ -59,11 +58,22 @@ def sincronizar_compras():
             
             for campo in node['fields']:
                 if campo['name'] == 'Pedido':
-                    pedido = campo['value']
+                    pedido = int(campo['value'])
             
             fase_atual = node['current_phase']['name']
-            
+
             dados_cards[pedido] = fase_atual
+
+        # Percorre a lista contendo o número de todos os pedidos de compra para compará-los com o status no Pipefy
+        for n_pedido in n_pedidos_compras:
+            if n_pedido in dados_cards and dados_cards[n_pedido] == 'Pagamento':
+                print("Tudo certo!")
+            elif n_pedido in dados_cards and dados_cards[n_pedido] != 'Pagamento':
+                print("Necessário atualizar o card!")
+            else: 
+                print(f"Erro: O pedido {n_pedido} não foi encontrado no Pipefy.")                
 
     else:
         print(f"Erro na requisição: {response.status_code}, {response.text}")
+
+print(sincronizar_compras())
