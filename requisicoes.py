@@ -92,7 +92,43 @@ def obter_campos_pipefy():
 
     response = requests.post(pipefy_url, json={"query": query}, headers=pipefy_headers)
     if response.status_code == 200:
-        #print("Campos do Pipe:", response.json())
         return(response.json())
+    else:
+        print("Erro ao buscar campos do Pipe:", response.status_code, response.json())
+
+
+def obter_fases_pipefy():
+
+    pipe_id = "301795013"
+
+    # Extrai o nome e o ID de cada fase do pipe
+    query = '''
+        {
+            pipe(id: %s) {
+                id
+                phases {
+                id
+                name
+            }
+        }
+    }
+    ''' % pipe_id
+
+    # Requisição POST para obter os dados dos cards
+    response = requests.post(pipefy_url, json={"query": query}, headers=pipefy_headers)
+    
+    if response.status_code == 200:
+        
+        dados_resposta = response.json()
+
+        # Dicionário guarda a relação dos IDs e nomes de cada fase
+        fases_dict = {}
+
+        for item in dados_resposta['data']['pipe']['phases']:
+            fase = {item['id']: item['name']}
+            fases_dict.update(fase)
+        
+        return fases_dict
+        
     else:
         print("Erro ao buscar campos do Pipe:", response.status_code, response.json())
