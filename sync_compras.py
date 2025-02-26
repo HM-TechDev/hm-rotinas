@@ -6,14 +6,18 @@ from requisicoes import *
 # compras: lista com dicionários contendo os dados de cada compra (nº pedido, id do pedido e id do fornecedor)
 compras = obter_compras_bling()
 
+# Guarda o nº de todos os pedidos de compra 'Em Aberto' numa lista
+n_pedidos_compras = []
+
+for pedido in compras:
+    n_pedido = pedido['numero_pedido']
+    n_pedidos_compras.append(n_pedido)
+
+
 # Obtém os campos dos cards no pipe
 # Campo desejado: {'id': 'nome_do_solicitante', 'label': 'Pedido'}
 card = obter_campos_pipefy()
 
-# Pipefy: percorrer o pipe buscando os cards referentes aos 'Pedidos em Aberto'
-# Para isso, comparar o nº do pedidos de 'compras' com o valor do 'nome_do_solicitante' 
-# Se True: verificar se está na fase correta
-# Se False: transferir o card para a fase adequada
 def sincronizar_compras():
 
     pipe_id = "305715568"
