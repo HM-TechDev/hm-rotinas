@@ -7,12 +7,11 @@ from requisicoes import *
 compras = obter_compras_bling()
 
 # Guarda o nº de todos os pedidos de compra 'Em Aberto' numa lista
-n_pedidos_compras = []
+n_pedidos_bling = []
 
 for pedido in compras:
     n_pedido = pedido['numero_pedido']
-    n_pedidos_compras.append(n_pedido)
-
+    n_pedidos_bling.append(n_pedido)
 
 # Obtém os campos dos cards no pipe
 # Campo desejado: {'id': 'nome_do_solicitante', 'label': 'Pedido'}
@@ -30,16 +29,20 @@ def sincronizar_compras():
         if valor == 'Pagamento':
             id_fase_pagamento = chave
             break
+    
+    pedido_fase = {}
+    for cards in cards_pipefy.values():
+        pedido_fase.update(cards)
 
    # Percorre a lista contendo o número de todos os pedidos de compra para compará-los com o status no Pipefy
-    for n_pedido in n_pedidos_compras:
-        
-        if n_pedido in cards_pipefy and cards_pipefy[n_pedido] == 'Pagamento':
-            print("Tudo certo!")
-        elif n_pedido in cards_pipefy and cards_pipefy[n_pedido] != 'Pagamento':
-            print("Necessário atualizar o card!")
-        else: 
-            print(f"Erro: O pedido {n_pedido} não foi encontrado no Pipefy.")
+    for n_pedido in n_pedidos_bling:
+        if n_pedido in pedido_fase and pedido_fase[n_pedido] == 'Pagamento':
+            print(f"Pedido nº {n_pedido} está atualizado!")
+        elif n_pedido in pedido_fase and pedido_fase[n_pedido] != 'Pagamento':
+            print(f"Pedido nº {n_pedido} foi enviado para a fase de 'Pagamento'.")
+        else:
+            print(f"Pedido nº {n_pedido} não encontrado no Pipefy")
+
 
 
 
