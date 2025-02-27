@@ -96,6 +96,60 @@ def obter_campos_pipefy():
     else:
         print("Erro ao buscar campos do Pipe:", response.status_code, response.json())
 
+def obter_cards_pipefy():
+    
+    pipe_id = "305715568"
+
+    # Extrai as informações guardadas no cards do pipe 
+    query = """
+        {
+            cards(pipe_id: %s) {
+                edges {
+                    node {
+                        id
+                        current_phase {
+                            name
+                        }
+                        done
+                        fields {
+                            name
+                            value
+                        }
+                    }
+                }
+            }
+        }
+    """ % pipe_id
+
+    # Requisição POST para obter os dados dos cards
+    response = requests.post(pipefy_url, json={'query': query}, headers=pipefy_headers)
+
+    if response.status_code == 200:
+        dados_resposta = response.json()
+
+        # Guarda {ID do card {Nº Pedido : Fase}} para cada card no pipe
+        dados_cards = {}
+
+        # Percorre os cards extraindo o nº do pedido e a fase em que cada card se encontra
+        for edge in dados_resposta['data']['cards']['edges']:
+            node = edge['node']
+            
+            card_id = node['id']
+            dados_cards[card_id] = {}
+
+            for campo in node['fields']:
+                if campo['name'] == 'Pedido':
+                    pedido = int(campo['value'])
+            
+            fase_atual = node['current_phase']['name']
+            
+            dados_cards[card_id][pedido] = fase_atual
+    
+    else:
+        print(f"Erro na requisição: {response.status_code}, {response.text}")
+
+    return dados_cards
+
 
 def obter_fases_pipefy():
 
