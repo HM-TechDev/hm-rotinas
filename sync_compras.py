@@ -35,9 +35,10 @@ def sincronizar_compras():
     for n_pedido in n_pedidos_bling:
         if n_pedido in df_cards['pedido'].values:
             row = df_cards.loc[df_cards['pedido'] == n_pedido]
+            
             if row['fase_atual'].values[0] == 'Pagamento':
                 print(f"Atualizado: {row['pedido'].values[0]} ({row['fase_atual'].values[0]})")
-            else:
+            elif row['fase_atual'].values[0] == 'Caseado/Botão' or row['fase_atual'].values[0] == 'Embalagem' :
                 print(f"Mover: {row['pedido'].values[0]} ({row['fase_atual'].values[0]})")
 
                 # Query usa o ID do card para movê-lo para a fase de 'Pagamento'
