@@ -36,10 +36,34 @@ def sincronizar_compras():
         if n_pedido in df_cards['pedido'].values:
             row = df_cards.loc[df_cards['pedido'] == n_pedido]
             if row['fase_atual'].values[0] == 'Pagamento':
-                print(f"Atualizado: {row['pedido'].values[0]} - {row['fase_atual'].values[0]}")
+                print(f"Atualizado: {row['pedido'].values[0]} ({row['fase_atual'].values[0]})")
             else:
-                print(f"Mover: {row['pedido'].values[0]} ({row['fase_atual'].values[0]}) - ID:{row['id'].values[0]}")
-        else:
-            print(f"Pedido nº{n_pedido} não encontrado no Pipefy")
+                print(f"Mover: {row['pedido'].values[0]} ({row['fase_atual'].values[0]})")
 
-print(sincronizar_compras())
+                # Query usa o ID do card para movê-lo para a fase de 'Pagamento'
+                payload = {
+                    "query": f"""
+                        mutation {{
+                            moveCardToPhase (input: {{
+                                card_id: "{row['id'].values[0]}",
+                                destination_phase_id: "{id_fase_pagamento}"
+                            }}) {{
+                                card {{
+                                    id
+                                    current_phase {{
+                                        name
+                                    }}
+                                }}
+                            }}
+                        }}
+                        """
+                }   
+
+                # Requisição POST para mover os cards para 'Pagamento'
+                resposta = requests.request("POST", pipefy_url, json=payload, headers=pipefy_headers)
+
+                if resposta.status_code == 200:
+                    return resposta.text
+            
+        else:
+            print(f"Pedido nº {n_pedido} não encontrado no Pipefy")
