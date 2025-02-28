@@ -19,7 +19,8 @@ card = obter_campos_pipefy()
 
 def sincronizar_compras():
 
-    cards_pipefy = obter_cards_pipefy()
+    # Obtém as informações (id, nº do pedido e fase atual) sobre os cards que se encontram no pipe 
+    df_cards = obter_cards_pipefy()
 
     # Obtém a ID da fase 'Pagamento'
     fases_pipefy = obter_fases_pipefy()
@@ -29,22 +30,16 @@ def sincronizar_compras():
         if valor == 'Pagamento':
             id_fase_pagamento = chave
             break
-    
-    pedido_fase = {}
-    for cards in cards_pipefy.values():
-        pedido_fase.update(cards)
 
    # Percorre a lista contendo o número de todos os pedidos de compra para compará-los com o status no Pipefy
     for n_pedido in n_pedidos_bling:
-        if n_pedido in pedido_fase and pedido_fase[n_pedido] == 'Pagamento':
-            print(f"Pedido nº {n_pedido} está atualizado!")
-        elif n_pedido in pedido_fase and pedido_fase[n_pedido] != 'Pagamento':
-            print(f"Pedido nº {n_pedido} foi enviado para a fase de 'Pagamento'.")
+        if n_pedido in df_cards['pedido'].values:
+            row = df_cards.loc[df_cards['pedido'] == n_pedido]
+            if row['fase_atual'].values[0] == 'Pagamento':
+                print(f"Atualizado: {row['pedido'].values[0]} - {row['fase_atual'].values[0]}")
+            else:
+                print(f"Mover: {row['pedido'].values[0]} ({row['fase_atual'].values[0]}) - ID:{row['id'].values[0]}")
         else:
-            print(f"Pedido nº {n_pedido} não encontrado no Pipefy")
-
-
-
-
+            print(f"Pedido nº{n_pedido} não encontrado no Pipefy")
 
 print(sincronizar_compras())
