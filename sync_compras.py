@@ -31,7 +31,9 @@ def sincronizar_compras():
             id_fase_pagamento = chave
             break
 
-   # Percorre a lista contendo o número de todos os pedidos de compra para compará-los com o status no Pipefy
+    # Percorre a lista contendo o número de todos os pedidos de compra para compará-los com o status no Pipefy
+    ausentes_pipefy = []
+
     for n_pedido in n_pedidos_bling:
         if n_pedido in df_cards['pedido'].values:
             row = df_cards.loc[df_cards['pedido'] == n_pedido]
@@ -67,4 +69,8 @@ def sincronizar_compras():
                     return resposta.text
             
         else:
-            print(f"Pedido nº {n_pedido} não encontrado no Pipefy")
+            ausentes_pipefy.append(n_pedido)
+    
+    print(f"Pedidos não encontrados no Pipefy {ausentes_pipefy}")
+
+print(sincronizar_compras())
