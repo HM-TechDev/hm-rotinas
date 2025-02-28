@@ -153,7 +153,7 @@ def obter_cards_pipefy():
 
 def obter_fases_pipefy():
 
-    pipe_id = "301795013"
+    pipe_id = "305715568"
 
     # Extrai o nome e o ID de cada fase do pipe
     query = '''
