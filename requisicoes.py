@@ -127,28 +127,28 @@ def obter_cards_pipefy():
     if response.status_code == 200:
         dados_resposta = response.json()
 
-        # Guarda {ID do card {Nº Pedido : Fase}} para cada card no pipe
-        dados_cards = {}
+        data = []
 
-        # Percorre os cards extraindo o nº do pedido e a fase em que cada card se encontra
         for edge in dados_resposta['data']['cards']['edges']:
             node = edge['node']
-            
-            card_id = node['id']
-            dados_cards[card_id] = {}
-
-            for campo in node['fields']:
-                if campo['name'] == 'Pedido':
-                    pedido = int(campo['value'])
-            
+            id = node['id']
             fase_atual = node['current_phase']['name']
             
-            dados_cards[card_id][pedido] = fase_atual
+            for field in node['fields']:
+                if field['name'] == 'Pedido':
+                    pedido = field['value']
+                    break
+            
+            pedido = int(pedido)
+
+            data.append({'id': id, 'pedido': pedido, 'fase_atual': fase_atual})
+        
+        df = pd.DataFrame(data)
     
     else:
         print(f"Erro na requisição: {response.status_code}, {response.text}")
 
-    return dados_cards
+    return df
 
 
 def obter_fases_pipefy():
