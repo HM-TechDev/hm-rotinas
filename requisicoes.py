@@ -35,7 +35,7 @@ pipefy_headers = {
     "Content-Type": "application/json"
 }
 
-def obter_compras_bling():
+def obter_compras_bling(status):
     """
     Obtém os dados dos pedidos de compras nos últimos 30 dias de acordo com o status
     
@@ -51,7 +51,7 @@ def obter_compras_bling():
     data_inicial = data_final - timedelta(days=30)
 
     compras = []
-    url_compras = f"https://bling.com.br/Api/v3/pedidos/compras?pagina=1&valorSituacao=3&dataInicial={data_inicial}&dataFinal={data_final}"
+    url_compras = f"https://bling.com.br/Api/v3/pedidos/compras?pagina=1&valorSituacao={status}&dataInicial={data_inicial}&dataFinal={data_final}"
     resposta = requests.get(url_compras, headers=bling_headers, timeout=15)
 
     try:      
