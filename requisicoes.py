@@ -64,23 +64,27 @@ def obter_compras_bling():
 
 
 def obter_campos_pipefy():
+    """
+    Obtém informações referentes aos campos usados nos cards de um determinado pipe
+    """
 
     pipe_id = "305715568"
 
+    # Define quais campos serão extraídos dos cards
     query = '''
     {
     pipe(id: %s){
         start_form_fields{
-        id
-        label
-        type
-        options
-        description
-        is_multiple
+            id
+            label
+            type
+            options
+            description
+            is_multiple
         }
         phases{
-        id
-        name
+            id
+            name
         fields{
             id
             label
@@ -90,17 +94,22 @@ def obter_campos_pipefy():
     }
     ''' % pipe_id
 
+    # Requisição POST para obter os dos campos incluídos nos cards
     response = requests.post(pipefy_url, json={"query": query}, headers=pipefy_headers)
+    
     if response.status_code == 200:
         return(response.json())
     else:
         print("Erro ao buscar campos do Pipe:", response.status_code, response.json())
 
 def obter_cards_pipefy():
-    
+    """
+    Obtém os dados guardados em cada card de determinado pipe e retorna estas informações num dataframe
+    """
+
     pipe_id = "305715568"
 
-    # Extrai as informações guardadas no cards do pipe 
+    # Define quais informações serão extraídas dos cards do pipe 
     query = """
         {
             cards(pipe_id: %s) {
@@ -129,6 +138,7 @@ def obter_cards_pipefy():
 
         data = []
 
+        # Percorre os cards guardando as informações mais relevantes de cada um num dicionário
         for edge in dados_resposta['data']['cards']['edges']:
             node = edge['node']
             id = node['id']
@@ -152,6 +162,9 @@ def obter_cards_pipefy():
 
 
 def obter_fases_pipefy():
+    """
+    Obtém o ID e nome de cada fase presente em um pipe, retornando estas informações num dicionário
+    """
 
     pipe_id = "305715568"
 
@@ -168,7 +181,7 @@ def obter_fases_pipefy():
     }
     ''' % pipe_id
 
-    # Requisição POST para obter os dados dos cards
+    # Requisição POST para obter os dados dos pipes
     response = requests.post(pipefy_url, json={"query": query}, headers=pipefy_headers)
     
     if response.status_code == 200:
