@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import requests
 import pandas as pd
 
@@ -36,12 +37,22 @@ pipefy_headers = {
 
 def obter_compras_bling():
     """
-    Obtém os dados dos pedidos de compras referentes aos pedidos em aberto
+    Obtém os dados dos pedidos de compras nos últimos 30 dias de acordo com o status
+    
+    Bling - Status
+    0: "Em Aberto"
+    1: "Atendido"
+    2: "Cancelado"
+    3: "Em Andamento"
+
     """
 
+    data_final = datetime.today().date()
+    data_inicial = data_final - timedelta(days=30)
+
     compras = []
-    url_compras_abertas = f"https://bling.com.br/Api/v3/pedidos/compras?valorSituacao=Em aberto"
-    resposta = requests.get(url_compras_abertas, headers=bling_headers, timeout=15)
+    url_compras = f"https://bling.com.br/Api/v3/pedidos/compras?pagina=1&valorSituacao=3&dataInicial={data_inicial}&dataFinal={data_final}"
+    resposta = requests.get(url_compras, headers=bling_headers, timeout=15)
 
     try:      
         # Verifica a resposta e converte o JSON para pyton
