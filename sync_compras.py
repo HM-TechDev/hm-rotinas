@@ -5,11 +5,11 @@ from requisicoes import *
 # Campo desejado: {'id': 'nome_do_solicitante', 'label': 'Pedido'}
 card = obter_campos_pipefy()
 
-def sincronizar_compras():
+def sincronizar_compras_andamento():
 
     # Obtém todas as compras 'Em Andamento' no Bling
     # compras: lista com dicionários contendo os dados de cada compra (nº pedido, id do pedido e id do fornecedor)
-    compras_em_andamento = obter_compras_bling("3")
+    compras_em_andamento = obter_compras_bling("0")
 
     # Guarda o nº de todos os pedidos de compra 'Em Aberto' numa lista
     n_pedidos_bling = []
@@ -36,10 +36,9 @@ def sincronizar_compras():
     for n_pedido in n_pedidos_bling:
         if n_pedido in df_cards['pedido'].values:
             row = df_cards.loc[df_cards['pedido'] == n_pedido]
-            
-            if row['fase_atual'].values[0] == 'Pagamento':
-                print(f"Atualizado: {row['pedido'].values[0]} ({row['fase_atual'].values[0]})")
-            elif row['fase_atual'].values[0] == 'Caseado/Botão' or row['fase_atual'].values[0] == 'Embalagem' :
+            print(f"Pedido: {row['pedido'].values[0]} ({row['fase_atual'].values[0]})")
+
+            if row['fase_atual'].values[0] == 'Caseado/Botão' or row['fase_atual'].values[0] == 'Embalagem' :
                 print(f"Mover: {row['pedido'].values[0]} ({row['fase_atual'].values[0]})")
 
                 # Query usa o ID do card para movê-lo para a fase de 'Pagamento'
@@ -63,13 +62,10 @@ def sincronizar_compras():
 
                 # Requisição POST para mover os cards para 'Pagamento'
                 resposta = requests.request("POST", pipefy_url, json=payload, headers=pipefy_headers)
-
-                if resposta.status_code == 200:
-                    return resposta.text
-            
+                print(f"{resposta.status_code} : {resposta.text}")
         else:
             ausentes_pipefy.append(n_pedido)
     
     print(f"Pedidos não encontrados no Pipefy {ausentes_pipefy}")
 
-print(sincronizar_compras())
+print(sincronizar_compras_andamento())
