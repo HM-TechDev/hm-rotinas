@@ -13,14 +13,11 @@ def sincronizar_compras_andamento():
     # Informações (id, nº do pedido e fase atual) sobre os cards que se encontram no pipe 
     df_cards = obter_cards_pipefy()
 
-    # Obtém a ID da fase 'Pagamento'
-    fases_pipefy = obter_fases_pipefy()
-    id_fase_pagamento = None
+    # TESTE - SUBSTITUIR PELO PIPE DESEJADO POSTERIORMENTE 
+    pipe_id = "305715568"
 
-    for chave, valor in fases_pipefy.items():
-        if valor == 'Pagamento':
-            id_fase_pagamento = chave
-            break
+    # Obtém a ID da fase 'Pagamento'
+    id_fase_pagamento = obter_id_fase(pipe_id, 'Pagamento')
 
     # Percorre a lista contendo o número de todos os pedidos de compra para compará-los com o status no Pipefy
     ausentes_pipefy = []
@@ -69,14 +66,11 @@ def sincronizar_compras_atendidas():
     # Obtém as informações (id, nº do pedido e fase atual) sobre os cards que se encontram no pipe 
     df_cards = obter_cards_pipefy()
 
-    # Obtém a ID da fase 'Finalziado'
-    fases_pipefy = obter_fases_pipefy()
-    id_fase_alvo = None
+    # TESTE - SUBSTITUIR PELO PIPE DESEJADO POSTERIORMENTE 
+    pipe_id = "305715568"
 
-    for chave, valor in fases_pipefy.items():
-        if valor == 'Finalizado':
-            id_fase_alvo = chave
-            break
+    # Obtém a ID da fase 'Pagamento'
+    id_fase_finalizado = obter_id_fase(pipe_id, 'Finalizado')
 
     # Percorre a lista contendo o número de todos os pedidos de compra para compará-los com o status no Pipefy
     ausentes_pipefy = []
@@ -90,13 +84,13 @@ def sincronizar_compras_atendidas():
             if row['fase_atual'].values[0] == 'Caseado/Botão' or row['fase_atual'].values[0] == 'Embalagem' or row['fase_atual'].values[0] == 'Pagamento':
                 print(f"Mover: {row['pedido'].values[0]} ({row['fase_atual'].values[0]})")
 
-                # Query usa o ID do card para movê-lo para a fase de 'Finalizado'
+                # Query usa o ID do card para movê-lo para a fase 'Finalizado'
                 payload = {
                     "query": f"""
                         mutation {{
                             moveCardToPhase (input: {{
                                 card_id: "{row['id'].values[0]}",
-                                destination_phase_id: "{id_fase_alvo}"
+                                destination_phase_id: "{id_fase_finalizado}"
                             }}) {{
                                 card {{
                                     id

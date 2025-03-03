@@ -190,12 +190,12 @@ def obter_cards_pipefy():
     return df
 
 
-def obter_fases_pipefy():
+def obter_fases_pipefy(pipe):
     """
     Obtém o ID e nome de cada fase presente em um pipe, retornando estas informações num dicionário
     """
 
-    pipe_id = "305715568"
+    id_pipe = pipe
 
     # Extrai o nome e o ID de cada fase do pipe
     query = '''
@@ -208,11 +208,11 @@ def obter_fases_pipefy():
             }
         }
     }
-    ''' % pipe_id
+    ''' % id_pipe
 
     # Requisição POST para obter os dados dos pipes
     response = requests.post(pipefy_url, json={"query": query}, headers=pipefy_headers)
-    
+
     if response.status_code == 200:
         
         dados_resposta = response.json()
@@ -228,3 +228,19 @@ def obter_fases_pipefy():
         
     else:
         print("Erro ao buscar campos do Pipe:", response.status_code, response.json())
+
+def obter_id_fase(pipe, nome_fase):
+
+    # Dicionário contendo a relação dos IDs e nomes de cada fase
+    fases_dict = obter_fases_pipefy(pipe)
+
+    # Variável guarda o ID da fase desejada
+    id_fase = None
+
+    # Percorre fases_dict para encontrar a chave associada ao nome da fase desejada.
+    for chave, valor in fases_dict.items():
+        if valor == nome_fase:
+            id_fase = chave
+            break
+
+    return id_fase
