@@ -1,7 +1,10 @@
-from funcoes_aux import *
 from requisicoes import *
+from funcoes_aux import *
 
 def sincronizar_compras():
+    """
+    Atualiza os cards do Pipefy de acordo com os status das compras no Bling, movendo-os para as fases apropriadas
+    """
 
     # Lista contendo os múmeros dos pedidos de compra "Em Andamento" e "Atendidos"
     pedidos_em_andamento = obter_pedidos_por_status('Em Andamento')
