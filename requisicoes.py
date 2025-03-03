@@ -38,13 +38,6 @@ pipefy_headers = {
 def obter_compras_bling(status):
     """
     Obtém os dados dos pedidos de compras nos últimos 30 dias de acordo com o status
-    
-    Bling - Status
-    0: "Em Aberto"
-    1: "Atendido"
-    2: "Cancelado"
-    3: "Em Andamento"
-
     """
 
     data_final = datetime.today().date()
@@ -72,6 +65,31 @@ def obter_compras_bling(status):
     except requests.exceptions.RequestException as e:
         print(f"Erro durante a requisição para o pedido {numero_pedido}: {str(e)}")
 
+
+def obter_pedidos_por_status(status):
+    """
+    Retorna a lista dos pedidos do Bling associados a um determinado status
+    """
+    
+    pedidos_compras_status = {"Em Aberto" : 0,
+                             "Atendido" : 1,
+                             "Cancelado" : 2,
+                             "Em Andamento" : 3}
+    
+    cod_status = pedidos_compras_status.get(status)
+
+    # Obtém todas as compras correspondente ao status especificado no Bling
+    # compras: lista de dicionários contendo os dados de cada compra (nº pedido, id do pedido e id do fornecedor)
+    dados_compras = obter_compras_bling(cod_status)
+
+    # Guarda o nº de todos os pedidos de compra correspondente ao status especificado numa lista
+    n_pedidos_bling = []
+
+    for pedido in dados_compras:
+        n_pedido = pedido['numero_pedido']
+        n_pedidos_bling.append(n_pedido)
+
+    return n_pedidos_bling
 
 
 def obter_campos_pipefy():
