@@ -7,18 +7,10 @@ card = obter_campos_pipefy()
 
 def sincronizar_compras_andamento():
 
-    # Obtém todas as compras 'Em Andamento' no Bling
-    # compras: lista com dicionários contendo os dados de cada compra (nº pedido, id do pedido e id do fornecedor)
-    compras_em_andamento = obter_compras_bling("0")
+    # Lista contendo os múmeros dos pedidos de compra "Em Andamento"
+    pedidos_em_andamento = obter_pedidos_por_status('Em Andamento')
 
-    # Guarda o nº de todos os pedidos de compra 'Em Aberto' numa lista
-    n_pedidos_bling = []
-
-    for pedido in compras_em_andamento:
-        n_pedido = pedido['numero_pedido']
-        n_pedidos_bling.append(n_pedido)
-
-    # Obtém as informações (id, nº do pedido e fase atual) sobre os cards que se encontram no pipe 
+    # Informações (id, nº do pedido e fase atual) sobre os cards que se encontram no pipe 
     df_cards = obter_cards_pipefy()
 
     # Obtém a ID da fase 'Pagamento'
@@ -33,7 +25,7 @@ def sincronizar_compras_andamento():
     # Percorre a lista contendo o número de todos os pedidos de compra para compará-los com o status no Pipefy
     ausentes_pipefy = []
 
-    for n_pedido in n_pedidos_bling:
+    for n_pedido in pedidos_em_andamento:
         if n_pedido in df_cards['pedido'].values:
             row = df_cards.loc[df_cards['pedido'] == n_pedido]
             print(f"Pedido: {row['pedido'].values[0]} ({row['fase_atual'].values[0]})")
@@ -71,17 +63,8 @@ def sincronizar_compras_andamento():
 
 def sincronizar_compras_atendidas():
 
-    # Obtém todas as compras 'Em Andamento' no Bling
-    # compras: lista com dicionários contendo os dados de cada compra (nº pedido, id do pedido e id do fornecedor)
-    compras_atendidas = obter_compras_bling("1")
-
-    # Guarda o nº de todos os pedidos de compra 'Atendidos' numa lista
-    n_pedidos_bling = []
-
-    for pedido in compras_atendidas:
-        n_pedido = pedido['numero_pedido']
-        n_pedidos_bling.append(n_pedido)
-    print('n_pedidos_bling')
+    # Lista contendo os múmeros dos pedidos de compra "Atendidos"
+    pedidos_atendidos = obter_pedidos_por_status('Atendido')
 
     # Obtém as informações (id, nº do pedido e fase atual) sobre os cards que se encontram no pipe 
     df_cards = obter_cards_pipefy()
@@ -99,7 +82,7 @@ def sincronizar_compras_atendidas():
     ausentes_pipefy = []
 
     # Envia todos os pedidos "Atendidos" no Bling para o status "Finalizado" no Pipefy
-    for n_pedido in n_pedidos_bling:
+    for n_pedido in pedidos_atendidos:
         if n_pedido in df_cards['pedido'].values:
             row = df_cards.loc[df_cards['pedido'] == n_pedido]
             print(f"Pedido: {row['pedido'].values[0]} ({row['fase_atual'].values[0]})")
