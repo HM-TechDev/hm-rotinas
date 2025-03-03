@@ -1,5 +1,5 @@
 import requests
-from requisicoes import *
+from funcoes_aux import *
 
 # Obtém os campos dos cards no pipe
 # Campo desejado: {'id': 'nome_do_solicitante', 'label': 'Pedido'}
