@@ -27,9 +27,9 @@ def mover_card(row, id_fase):
 
     # Requisição POST para mover os cards no Pipefy
     resposta = requests.request("POST", pipefy_url, json=payload, headers=pipefy_headers)
-    print(f"{resposta.status_code} : {resposta.text}")
 
-    return print("Cards movidos com sucesso!")
+    return print(f"{resposta.status_code} : {resposta.text}")
+
 
 def processar_cards(pedidos, df_cards, id_fase, tipo):
     """

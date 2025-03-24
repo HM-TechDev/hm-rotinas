@@ -27,3 +27,4 @@ def sincronizar_compras():
     return "Cards atualizados com sucesso!"
 
 print(sincronizar_compras())
+input("Press any key to exit...")
