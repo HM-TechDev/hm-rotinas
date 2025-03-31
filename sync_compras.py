@@ -14,7 +14,7 @@ def sincronizar_compras():
     df_cards = obter_cards_pipefy()
 
     # TESTE - SUBSTITUIR PELO PIPE DESEJADO POSTERIORMENTE 
-    pipe_id = "305715568"
+    pipe_id = "301795013"
 
     # Obtém a ID das fases 'Pagamento' e 'Finalizado'
     id_fase_pagamento = obter_id_fase(pipe_id, 'Pagamento')

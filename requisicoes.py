@@ -97,7 +97,7 @@ def obter_campos_pipefy():
     Obtém informações referentes aos campos usados nos cards de um determinado pipe
     """
 
-    pipe_id = "305715568"
+    pipe_id = "301795013"
 
     # Define quais campos serão extraídos dos cards
     query = '''
@@ -136,7 +136,7 @@ def obter_cards_pipefy():
     Obtém os dados guardados em cada card de determinado pipe e retorna estas informações num dataframe
     """
 
-    pipe_id = "305715568"
+    pipe_id = "301795013"
 
     # Define quais informações serão extraídas dos cards do pipe 
     query = """
