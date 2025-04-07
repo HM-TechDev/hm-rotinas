@@ -60,4 +60,5 @@ def processar_cards(pedidos, df_cards, id_fase, tipo):
         else:
             ausentes_pipefy.append(n_pedido)
     
+    # Terminal exibe a lista dos pedidos de compra nao encontrados
     print(f"Pedidos não encontrados no Pipefy (status = {tipo}): {ausentes_pipefy}")
