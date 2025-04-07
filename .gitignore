@@ -1,0 +1,24 @@
+# Virtual environment
+venv/
+__pycache__/
+*.pyc
+*.pdb
+
+# Compiled Python files
+*.py[cod]
+*$py.class
+
+# IDE-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dependency and package directories
+*.egg-info/
+dist/
+build/
+
+# Miscellaneous
+.DS_Store
+*.log
