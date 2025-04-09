@@ -22,3 +22,8 @@ build/
 # Miscellaneous
 .DS_Store
 *.log
+
+# Project-Specific
+cards.json
+cursor.json
+cards.xlsx
