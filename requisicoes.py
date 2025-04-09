@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import requests
 import pandas as pd
+import re
 
 
 def obter_token_bling():
@@ -178,7 +179,10 @@ def obter_cards_pipefy():
                     pedido = field['value']
                     break
             
-            pedido = int(pedido)
+            if pedido.isdigit():
+                pedido = int(pedido)
+            else:
+                pedido = re.sub(r'\D', '', pedido)
 
             data.append({'id': id, 'pedido': pedido, 'fase_atual': fase_atual})
         
