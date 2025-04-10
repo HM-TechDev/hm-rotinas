@@ -181,7 +181,7 @@ def obter_cards_pipefy():
     
     # Variável para armazenar dicionários contendo a relação dos IDs/Fases
     data = []
-    dados_json = {}
+    dados_json = []
 
     while True:
         
@@ -218,7 +218,7 @@ def obter_cards_pipefy():
 
         if response.status_code == 200:
             dados_resposta = response.json()
-            dados_json.update(dados_resposta)
+            dados_json.append(dados_resposta)
 
             # Percorre os cards guardando as informações mais relevantes de cada um num dicionário
             for edge in dados_resposta['data']['allCards']['edges']:
@@ -231,9 +231,9 @@ def obter_cards_pipefy():
                         pedido = field['value']
                         break
 
-                # Remove caracteres não-numéricos do pedido
+                # Remove caracteres não-numéricos do pedido e obtém os 4 primeiros dígitos
                 if pedido.isdigit() == False:
-                    pedido = re.sub(r'\D', '', pedido)
+                    pedido = re.sub(r'\D', '', pedido)[:4]
                 pedido = int(pedido)
 
                 # Insere o dicionário na lista
