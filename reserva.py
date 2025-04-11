@@ -1,3 +1,4 @@
+from tokens import *
 import requests
 import pandas as pd
 import re
@@ -137,4 +138,42 @@ def obter_cards_pipefy():
 
     return df_cards
 
-print(obter_cards_pipefy())
+
+def obter_campos_pipefy():
+    """
+    Obtém informações referentes aos campos usados nos cards de um determinado pipe
+    """
+
+    pipe_id = "306043381"
+
+    # Define quais campos serão extraídos dos cards
+    query = '''
+    {
+    pipe(id: %s){
+        start_form_fields{
+            id
+            label
+            type
+            options
+            description
+            is_multiple
+        }
+        phases{
+            id
+            name
+        fields{
+            id
+            label
+        }
+        }
+    }
+    }
+    ''' % pipe_id
+
+    # Requisição POST para obter os dos campos incluídos nos cards
+    response = requests.post(pipefy_url, json={"query": query}, headers=pipefy_headers)
+    
+    if response.status_code == 200:
+        return(response.json())
+    else:
+        print("Erro ao buscar campos do Pipe:", response.status_code, response.json())
