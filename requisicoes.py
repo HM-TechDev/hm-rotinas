@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import re
 import json
-
+import time
 
 def obter_token_bling():
     """
@@ -178,12 +178,13 @@ def obter_cards_pipefy():
     # Informações necessárias para executar a query para o Pipefy
     pipe_id = "301795013"
     endCursor = obter_cursor_pipefy()
-    
+    pagina = True
+
     # Variável para armazenar dicionários contendo a relação dos IDs/Fases
     data = []
     dados_json = []
 
-    while True:
+    while pagina == True:
         
         # Define quais informações serão extraídas dos cards do pipe 
         query = """
@@ -191,8 +192,6 @@ def obter_cards_pipefy():
                 allCards(pipeId: %s, first: 50, after: "%s") {
                 pageInfo {
                     hasNextPage
-                    hasPreviousPage
-                    startCursor
                     endCursor
                 }
                     edges {
@@ -239,12 +238,15 @@ def obter_cards_pipefy():
                 # Insere o dicionário na lista
                 data.append({'id': id, 'pedido': pedido, 'fase_atual': fase_atual})
             
-            # Interrompe o processo se não houver mais páginas com dados disponíveis
-            if not dados_resposta['data']['allCards']['pageInfo']['hasNextPage']:
-                break
-
             # Atualiza o endCursor para a próxima página
             endCursor = dados_resposta['data']['allCards']['pageInfo']['endCursor']
+
+            # Interrompe o processo se não houver mais páginas com dados disponíveis
+            pagina = dados_resposta['data']['allCards']['pageInfo']['hasNextPage']
+            if pagina == False:
+                break
+
+            time.sleep(0.5)
 
         else:
             print(f"Erro na requisição: {response.status_code}, {response.text}")
