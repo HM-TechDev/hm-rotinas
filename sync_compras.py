@@ -11,10 +11,10 @@ def sincronizar_compras():
     pedidos_atendidos = obter_pedidos_por_status('Atendido')
 
     # Informações (id, nº do pedido e fase atual) sobre os cards que se encontram no pipe 
-    df_cards = obter_cards_pipefy()
+    df_cards = obter_cards_fase()
 
     # TESTE - SUBSTITUIR PELO PIPE DESEJADO POSTERIORMENTE 
-    pipe_id = "301795013"
+    pipe_id = "306043381"
 
     # Obtém a ID das fases 'Pagamento' e 'Finalizado'
     id_fase_pagamento = obter_id_fase(pipe_id, 'Pagamento')

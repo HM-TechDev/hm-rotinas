@@ -89,7 +89,7 @@ def obter_pedidos_por_status(status):
 
     for pedido in dados_compras:
         n_pedido = pedido['numero_pedido']
-        n_pedidos_bling.append(n_pedido)
+        n_pedidos_bling.append(str(n_pedido))
 
     return n_pedidos_bling
 
@@ -99,7 +99,7 @@ def obter_campos_pipefy():
     Obtém informações referentes aos campos usados nos cards de um determinado pipe
     """
 
-    pipe_id = "301795013"
+    pipe_id = "306043381"
 
     # Define quais campos serão extraídos dos cards
     query = '''
@@ -133,134 +133,89 @@ def obter_campos_pipefy():
     else:
         print("Erro ao buscar campos do Pipe:", response.status_code, response.json())
 
-def obter_cursor_pipefy():
+
+def obter_cards_fase():
     """
-    Obtém o endCursor necessário pára realizar a paginação no Pipefy
-    """
-
-    pipe_id = "301795013"
-
-    # Define quais informações serão extraídas dos cards do pipe 
-    query = """
-        {
-        allCards(pipeId: %s) {
-        pageInfo {
-            endCursor
-            hasNextPage
-            hasPreviousPage
-            startCursor
-        }
-            edges {
-                node {
-                    id
-                    }
-                }
-            }
-        }
-    """ % (pipe_id)
-
-    # Requisição POST para obter os dados dos cards
-    response = requests.post(pipefy_url, json={'query': query}, headers=pipefy_headers)
-
-    if response.status_code == 200:
-        dados_resposta = response.json()
-        #with open('cursor.json', 'w') as arquivo:
-        #    json.dump(dados_resposta, arquivo, indent=4)
-        
-        return dados_resposta["data"]["allCards"]["pageInfo"]["endCursor"]
-
-
-def obter_cards_pipefy():
-    """
-    Obtém os dados guardados em cada card de determinado pipe e retorna estas informações num dataframe
+    Obtém os cards de todas as fases do pipe exceto os que se encontram na fase "Pagamento"
     """
 
-    # Informações necessárias para executar a query para o Pipefy
-    pipe_id = "301795013"
-    endCursor = obter_cursor_pipefy()
+    pipe_id = "306043381"
+    endCursor = None
     pagina = True
 
-    # Variável para armazenar dicionários contendo a relação dos IDs/Fases
-    data = []
+    # Listas para armazenar as informações dos cards
     dados_json = []
+    dados_cards = []
 
-    while pagina == True:
-        
-        # Define quais informações serão extraídas dos cards do pipe 
+    while pagina:
+
         query = """
             {
-                allCards(pipeId: %s, first: 50, after: "%s") {
-                pageInfo {
-                    hasNextPage
-                    endCursor
-                }
+                allCards(pipeId: %s, after: %s) {
+                    pageInfo {
+                        hasNextPage
+                        endCursor
+                    }
                     edges {
                         node {
                             id
                             current_phase {
+                                id
                                 name
                             }
-                            done
                             fields {
                                 name
                                 value
                             }
                         }
-                        cursor
                     }
                 }
             }
-        """ % (pipe_id, endCursor if endCursor else "")
+        """ % (pipe_id, 'null' if endCursor is None else '"' + endCursor + '"')
 
-        # Requisição POST para obter os dados dos cards
         response = requests.post(pipefy_url, json={'query': query}, headers=pipefy_headers)
 
         if response.status_code == 200:
             dados_resposta = response.json()
             dados_json.append(dados_resposta)
-
-            # Percorre os cards guardando as informações mais relevantes de cada um num dicionário
-            for edge in dados_resposta['data']['allCards']['edges']:
-                node = edge['node']
-                id = node['id']
-                fase_atual = node['current_phase']['name']
-                
-                for field in node['fields']:
-                    if field['name'] == 'Pedido':
-                        pedido = field['value']
-                        break
-
-                # Remove caracteres não-numéricos do pedido e obtém os 4 primeiros dígitos
-                if pedido.isdigit() == False:
-                    pedido = re.sub(r'\D', '', pedido)[:4]
-                pedido = int(pedido)
-
-                # Insere o dicionário na lista
-                data.append({'id': id, 'pedido': pedido, 'fase_atual': fase_atual})
             
-            # Atualiza o endCursor para a próxima página
-            endCursor = dados_resposta['data']['allCards']['pageInfo']['endCursor']
+            if 'data' in dados_resposta and dados_resposta['data']['allCards'] is not None:
 
-            # Interrompe o processo se não houver mais páginas com dados disponíveis
-            pagina = dados_resposta['data']['allCards']['pageInfo']['hasNextPage']
-            if pagina == False:
-                break
+                for edge in dados_resposta['data']['allCards']['edges']:
+                    card = edge['node']
+                    card_id = card['id']
+                    card_fase = card['current_phase']['name']
 
-            time.sleep(0.5)
+                    for field in card['fields']:
+                        if field['name'] == 'Pedido':
+                            card_pedido = field['value']
+                            break
 
+                    if card['current_phase']['name'] != "Finalizado":
+                        dados_cards.append({'id': card_id, 'pedido': card_pedido, 'fase_atual': card_fase})
+                
+                # Atualiza o cursor para a próxima página
+                endCursor = dados_resposta['data']['allCards']['pageInfo']['endCursor']
+                pagina = dados_resposta['data']['allCards']['pageInfo']['hasNextPage']
+
+                time.sleep(0.5)
+            else:
+                print("Nenhum card encontrado ou dados mal formatados:", dados_resposta)
+                break 
         else:
             print(f"Erro na requisição: {response.status_code}, {response.text}")
+            break
         
-        with open('cards.json', 'w') as arquivo:
-            json.dump(dados_json, arquivo, indent=4)
+        with open('cards_fase.json', 'a') as arquivo:
+            json.dump(dados_resposta, arquivo, indent=4)
     
-    # Cria um dataframe com os dados dos cards
-    df_cards = pd.DataFrame(data)
-    df_cards.to_excel('cards.xlsx', index=False)
+    print("FIM")
 
-    return df_cards
+    cards_filtrados = pd.DataFrame(dados_cards)
+    cards_filtrados.to_excel('cards_fase.xlsx', index=False)
+    
+    return cards_filtrados
 
-print(obter_cards_pipefy())
 
 def obter_fases_pipefy(pipe):
     """
