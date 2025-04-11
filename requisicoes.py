@@ -134,12 +134,11 @@ def obter_campos_pipefy():
         print("Erro ao buscar campos do Pipe:", response.status_code, response.json())
 
 
-def obter_cards_fase():
+def obter_cards_fase(pipe):
     """
     Obtém os cards de todas as fases do pipe exceto os que se encontram na fase "Pagamento"
     """
 
-    pipe_id = "306043381"
     endCursor = None
     pagina = True
 
@@ -171,7 +170,7 @@ def obter_cards_fase():
                     }
                 }
             }
-        """ % (pipe_id, 'null' if endCursor is None else '"' + endCursor + '"')
+        """ % (pipe, 'null' if endCursor is None else '"' + endCursor + '"')
 
         response = requests.post(pipefy_url, json={'query': query}, headers=pipefy_headers)
 
@@ -222,8 +221,6 @@ def obter_fases_pipefy(pipe):
     Obtém o ID e nome de cada fase presente em um pipe, retornando estas informações num dicionário
     """
 
-    id_pipe = pipe
-
     # Extrai o nome e o ID de cada fase do pipe
     query = '''
         {
@@ -235,7 +232,7 @@ def obter_fases_pipefy(pipe):
             }
         }
     }
-    ''' % id_pipe
+    ''' % pipe
 
     # Requisição POST para obter os dados dos pipes
     response = requests.post(pipefy_url, json={"query": query}, headers=pipefy_headers)
