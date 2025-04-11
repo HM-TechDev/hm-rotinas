@@ -24,6 +24,8 @@ build/
 *.log
 
 # Project-Specific
-cards.json
 cursor.json
+cards.json
 cards.xlsx
+cards_fase.json
+cards_fase.xlsx

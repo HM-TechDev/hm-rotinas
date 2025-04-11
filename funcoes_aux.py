@@ -51,8 +51,9 @@ def processar_cards(pedidos, df_cards, id_fase, tipo):
 
     # Percorre a lista contendo todos os pedidos de compra para verificar se os mesmos se encontram no Pipefy
     for n_pedido in pedidos:
+        
         if n_pedido in df_cards['pedido'].values:
-
+            
             # Verifica se o card está em uma das fases válidas para o status para então movê-lo
             row = df_cards.loc[df_cards['pedido'] == n_pedido]
             if row['fase_atual'].values[0] in fases_atuais_validas:
