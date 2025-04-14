@@ -1,5 +1,16 @@
 from requisicoes import *
 from funcoes_aux import *
+import logging
+
+
+# Configura o logger
+logging.basicConfig(
+    filename='logs.txt',
+    filemode='w',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s- %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 def sincronizar_compras():
     """
@@ -23,7 +34,8 @@ def sincronizar_compras():
     processar_cards(pedidos_em_andamento, df_cards, id_fase_pagamento, "ANDAMENTO")
     processar_cards(pedidos_atendidos, df_cards, id_fase_finalizado, "ATENDIDOS")
 
-    return "Cards atualizados com sucesso!"
+    mensagem = "Cards atualizados com sucesso!"
+    return mensagem
 
 print(sincronizar_compras())
 input("Press any key to exit...")
