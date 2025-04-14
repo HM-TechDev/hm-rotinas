@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from tokens import *
-import requests
 import pandas as pd
+import requests
+import logging
 import json
 import time
 
@@ -74,75 +75,78 @@ def obter_cards_fase(pipe):
     dados_json = []
     dados_cards = []
 
-    while pagina:
+    try: 
+        while pagina:
 
-        query = """
-            {
-                allCards(pipeId: %s, after: %s) {
-                    pageInfo {
-                        hasNextPage
-                        endCursor
-                    }
-                    edges {
-                        node {
-                            id
-                            current_phase {
+            query = """
+                {
+                    allCards(pipeId: %s, after: %s) {
+                        pageInfo {
+                            hasNextPage
+                            endCursor
+                        }
+                        edges {
+                            node {
                                 id
-                                name
-                            }
-                            fields {
-                                name
-                                value
+                                current_phase {
+                                    id
+                                    name
+                                }
+                                fields {
+                                    name
+                                    value
+                                }
                             }
                         }
                     }
                 }
-            }
-        """ % (pipe, 'null' if endCursor is None else '"' + endCursor + '"')
+            """ % (pipe, 'null' if endCursor is None else '"' + endCursor + '"')
 
-        response = requests.post(pipefy_url, json={'query': query}, headers=pipefy_headers)
+            response = requests.post(pipefy_url, json={'query': query}, headers=pipefy_headers)
 
-        if response.status_code == 200:
-            dados_resposta = response.json()
-            dados_json.append(dados_resposta)
-            
-            if 'data' in dados_resposta and dados_resposta['data']['allCards'] is not None:
-
-                for edge in dados_resposta['data']['allCards']['edges']:
-                    card = edge['node']
-                    card_id = card['id']
-                    card_fase = card['current_phase']['name']
-
-                    for field in card['fields']:
-                        if field['name'] == 'Pedido':
-                            card_pedido = field['value']
-                            break
-
-                    if card['current_phase']['name'] != "Finalizado":
-                        dados_cards.append({'id': card_id, 'pedido': card_pedido, 'fase_atual': card_fase})
+            if response.status_code == 200:
+                dados_resposta = response.json()
+                dados_json.append(dados_resposta)
                 
-                # Atualiza o cursor para a próxima página
-                endCursor = dados_resposta['data']['allCards']['pageInfo']['endCursor']
-                pagina = dados_resposta['data']['allCards']['pageInfo']['hasNextPage']
+                if 'data' in dados_resposta and dados_resposta['data']['allCards'] is not None:
 
-                time.sleep(0.5)
+                    for edge in dados_resposta['data']['allCards']['edges']:
+                        card = edge['node']
+                        card_id = card['id']
+                        card_fase = card['current_phase']['name']
+
+                        for field in card['fields']:
+                            if field['name'] == 'Pedido':
+                                card_pedido = field['value']
+                                break
+
+                        if card['current_phase']['name'] != "Finalizado":
+                            dados_cards.append({'id': card_id, 'pedido': card_pedido, 'fase_atual': card_fase})
+                    
+                    # Atualiza o cursor para a próxima página
+                    endCursor = dados_resposta['data']['allCards']['pageInfo']['endCursor']
+                    pagina = dados_resposta['data']['allCards']['pageInfo']['hasNextPage']
+
+                    time.sleep(0.5)
+                else:
+                    print("Nenhum card encontrado ou dados mal formatados:", dados_resposta)
+                    break 
             else:
-                print("Nenhum card encontrado ou dados mal formatados:", dados_resposta)
-                break 
-        else:
-            print(f"Erro na requisição: {response.status_code}, {response.text}")
-            break
-        
-        with open('cards_fase.json', 'a') as arquivo:
-            json.dump(dados_resposta, arquivo, indent=4)
-    
-    print("FIM")
+                print(f"Erro na requisição: {response.status_code}, {response.text}")
+                break
+            
+            with open('cards_fase.json', 'a') as arquivo:
+                json.dump(dados_resposta, arquivo, indent=4)
 
-    cards_filtrados = pd.DataFrame(dados_cards)
-    cards_filtrados.to_excel('cards_fase.xlsx', index=False)
+        cards_filtrados = pd.DataFrame(dados_cards)
+        cards_filtrados.to_excel('cards_fase.xlsx', index=False)
     
-    return cards_filtrados
+        return cards_filtrados
 
+    except requests.exceptions.RequestException as e:
+        mensagem_erro = f"Erro durante a requisição: {str(e)}"
+        logging.error(mensagem_erro)
+        print(mensagem_erro)
 
 def obter_fases_pipefy(pipe):
     """
