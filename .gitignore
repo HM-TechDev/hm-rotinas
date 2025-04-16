@@ -24,9 +24,6 @@ build/
 *.log
 
 # Project-Specific
+*.json
+*.xlsx
 logs.txt
-cursor.json
-cards.json
-cards.xlsx
-cards_fase.json
-cards_fase.xlsx

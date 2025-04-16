@@ -33,15 +33,21 @@ def mover_card(row, id_fase):
         # Requisição POST para mover os cards no Pipefy
         resposta = requests.request("POST", pipefy_url, json=payload, headers=pipefy_headers)
 
-        # Informa quais cards foram atualizados
-        mensagem = f"Card {n_pedido} (ID = {id_pedido}) movido para '{resposta.json()['data']['moveCardToPhase']['card']['current_phase']['name']}'\n"
-        logging.info(mensagem) 
-        print(mensagem)
+        if resposta.status_code == 200:
+            # Informa quais cards foram atualizados
+            mensagem = f"Card {n_pedido} (ID = {id_pedido}) movido para '{resposta.json()['data']['moveCardToPhase']['card']['current_phase']['name']}"
+            logging.info(mensagem) 
+            print(mensagem)
+        else:
+            mensagem_erro1 = f"Erro na requisição para mover o card {n_pedido} (ID = {id_pedido}): {resposta.status_code}{resposta.text}"
+            logging.error(mensagem_erro1)
+            print(mensagem_erro1)
     
     except requests.exceptions.RequestException as e:
-        mensagem_erro: f"Erro ao mover o card: {e}"
-        logging.error(mensagem_erro)
-        print(mensagem_erro)
+        mensagem_erro2: f"Erro ao mover um card: {e}"
+        logging.error(mensagem_erro2)
+        print(mensagem_erro2)
+
 
 
 def processar_cards(pedidos, df_cards, id_fase, tipo):
@@ -78,12 +84,12 @@ def processar_cards(pedidos, df_cards, id_fase, tipo):
                 ausentes_pipefy.append(n_pedido)
         
         # Lista dos pedidos de compra nao encontrados
-        mensagem_erro = f"Pedidos nao encontrados no Pipefy (status = {tipo}): {ausentes_pipefy}\n"
-        logging.error(mensagem_erro) 
-        print(mensagem_erro)
+        mensagem_erro1 = f"Pedidos nao encontrados no Pipefy (status = {tipo}): {ausentes_pipefy}\n"
+        logging.error(mensagem_erro1) 
+        print(mensagem_erro1)
     
     except Exception as e:
-        mensagem_erro = f"Erro ao processar os cards: {e}"
-        logging.error(mensagem_erro)
-        print(mensagem_erro)
+        mensagem_erro2 = f"Erro ao processar os cards: {e}"
+        logging.error(mensagem_erro2)
+        print(mensagem_erro2)
         

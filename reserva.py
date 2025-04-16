@@ -134,7 +134,6 @@ def obter_cards_pipefy():
     
     # Cria um dataframe com os dados dos cards
     df_cards = pd.DataFrame(data)
-    df_cards.to_excel('cards.xlsx', index=False)
 
     return df_cards
 
