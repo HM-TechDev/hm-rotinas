@@ -32,9 +32,14 @@ def obter_compras_bling(status):
                 # Adicionando um dicionário com id_produto e quantidade à lista "Produtos"
                 compras.append({"numero_pedido": numero_pedido,"id_compras": id_compras, "id_fornecedor": id_fornecedor})
             return compras
+        else:
+            mensagem_erro = f"Erro na requisição para extrair os pedidos do Bling ({resposta.status_code})"
+            logging.error(mensagem_erro)
+            print(mensagem_erro)
 
     except requests.exceptions.RequestException as e:
-        print(f"Erro durante a requisição para o pedido {numero_pedido}: {str(e)}")
+        print(f"Erro ao extrair os pedidos do Bling: {str(e)}")
+        return None
 
 
 def obter_pedidos_por_status(status):
@@ -53,14 +58,21 @@ def obter_pedidos_por_status(status):
     # compras: lista de dicionários contendo os dados de cada compra (nº pedido, id do pedido e id do fornecedor)
     dados_compras = obter_compras_bling(cod_status)
 
-    # Guarda o nº de todos os pedidos de compra correspondente ao status especificado numa lista
-    n_pedidos_bling = []
+    if dados_compras: 
+        # Guarda o nº de todos os pedidos de compra correspondente ao status especificado numa lista
+        n_pedidos_bling = []
 
-    for pedido in dados_compras:
-        n_pedido = pedido['numero_pedido']
-        n_pedidos_bling.append(str(n_pedido))
+        for pedido in dados_compras:
+            n_pedido = pedido['numero_pedido']
+            n_pedidos_bling.append(str(n_pedido))
 
-    return n_pedidos_bling
+        return n_pedidos_bling
+    
+    else:
+        mensagem_erro = "Erro ao extrair os pedidos por status ({status})"
+        logging.error(mensagem_erro)
+        print(mensagem_erro)
+        raise Exception("Erro ao extrair os pedidos por status")
 
 
 def obter_cards_fase(pipe):
@@ -102,10 +114,10 @@ def obter_cards_fase(pipe):
                 }
             """ % (pipe, 'null' if endCursor is None else '"' + endCursor + '"')
 
-            response = requests.post(pipefy_url, json={'query': query}, headers=pipefy_headers)
+            resposta = requests.post(pipefy_url, json={'query': query}, headers=pipefy_headers)
 
-            if response.status_code == 200:
-                dados_resposta = response.json()
+            if resposta.status_code == 200:
+                dados_resposta = resposta.json()
                 dados_json.append(dados_resposta)
                 
                 if 'data' in dados_resposta and dados_resposta['data']['allCards'] is not None:
@@ -122,31 +134,33 @@ def obter_cards_fase(pipe):
 
                         if card['current_phase']['name'] != "Finalizado":
                             dados_cards.append({'id': card_id, 'pedido': card_pedido, 'fase_atual': card_fase})
-                    
                     # Atualiza o cursor para a próxima página
                     endCursor = dados_resposta['data']['allCards']['pageInfo']['endCursor']
                     pagina = dados_resposta['data']['allCards']['pageInfo']['hasNextPage']
 
                     time.sleep(0.5)
                 else:
-                    print("Nenhum card encontrado ou dados mal formatados:", dados_resposta)
+                    mensagem_erro1 = "Nenhum card encontrado, ou dados mal formatados {dados_resposta}"
+                    logging.error(mensagem_erro1)
+                    print(mensagem_erro1)
                     break 
             else:
-                print(f"Erro na requisição: {response.status_code}, {response.text}")
+                mensagem_erro2 = f"Erro na requisição para extrair os cards do Pipefy ({resposta.status_code}, {resposta.text})"
+                logging.error(mensagem_erro2)
+                print(mensagem_erro2)
                 break
             
-            with open('cards_fase.json', 'a') as arquivo:
-                json.dump(dados_resposta, arquivo, indent=4)
+            #with open('cards_fase.json', 'a') as arquivo:
+            #    json.dump(dados_resposta, arquivo, indent=4)
 
         cards_filtrados = pd.DataFrame(dados_cards)
-        cards_filtrados.to_excel('cards_fase.xlsx', index=False)
     
         return cards_filtrados
 
     except requests.exceptions.RequestException as e:
-        mensagem_erro = f"Erro durante a requisição: {str(e)}"
-        logging.error(mensagem_erro)
-        print(mensagem_erro)
+        mensagem_erro3 = f"Erro ao extrair os cards do pipefy: {str(e)}"
+        logging.error(mensagem_erro3)
+        print(mensagem_erro3)
 
 def obter_fases_pipefy(pipe):
     """
@@ -167,11 +181,11 @@ def obter_fases_pipefy(pipe):
     ''' % pipe
 
     # Requisição POST para obter os dados dos pipes
-    response = requests.post(pipefy_url, json={"query": query}, headers=pipefy_headers)
+    resposta = requests.post(pipefy_url, json={"query": query}, headers=pipefy_headers)
 
-    if response.status_code == 200:
+    if resposta.status_code == 200:
         
-        dados_resposta = response.json()
+        dados_resposta = resposta.json()
 
         # Dicionário guarda a relação dos IDs e nomes de cada fase
         fases_dict = {}
@@ -183,20 +197,27 @@ def obter_fases_pipefy(pipe):
         return fases_dict
         
     else:
-        print("Erro ao buscar campos do Pipe:", response.status_code, response.json())
+        mensagem_erro = f"Erro ao buscar fases do Pipe: {resposta.status_code}, {resposta.json()}"
+        logging.error(mensagem_erro)
+        print(mensagem_erro)
+        return None
 
 def obter_id_fase(pipe, nome_fase):
 
     # Dicionário contendo a relação dos IDs e nomes de cada fase
     fases_dict = obter_fases_pipefy(pipe)
 
-    # Variável guarda o ID da fase desejada
-    id_fase = None
+    if fases_dict:
+        # Variável guarda o ID da fase desejada
+        id_fase = None
 
-    # Percorre fases_dict para encontrar a chave associada ao nome da fase desejada.
-    for chave, valor in fases_dict.items():
-        if valor == nome_fase:
-            id_fase = chave
-            break
+        # Percorre fases_dict para encontrar a chave associada ao nome da fase desejada.
+        for chave, valor in fases_dict.items():
+            if valor == nome_fase:
+                id_fase = chave
+                break
 
-    return id_fase
+        return id_fase
+
+    else:
+        raise ValueError(f"Erro: não foi possível obter o ID da fase {nome_fase}")
